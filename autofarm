@@ -1,0 +1,184 @@
+if (not game:IsLoaded()) then 
+	game.Loaded:Wait()
+	task.wait(1)
+end
+
+repeat task.wait(0.1) until (game:GetService("Players").LocalPlayer) and (game:GetService("Players").LocalPlayer.Character)
+
+local zyzoGui = Instance.new("ScreenGui")
+zyzoGui.Parent = game:GetService("CoreGui")
+zyzoGui.Name = "abcdefg"
+zyzoGui.IgnoreGuiInset = true 
+local zyzoLabel = Instance.new("TextLabel")
+zyzoLabel.Parent = zyzoGui 
+zyzoLabel.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+zyzoLabel.Active = false
+zyzoLabel.Font = Enum.Font.MontserratMedium
+zyzoLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+zyzoLabel.TextSize = 24
+zyzoLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+zyzoLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+zyzoLabel.Size = UDim2.new(1, 0, 1, 0)
+
+local zyzoPlayer = game:GetService("Players").LocalPlayer
+local zyzoCashiers = workspace.Cashiers 
+local zyzoDrop = workspace.Ignored.Drop
+local zyzoDis = false
+local zyzoBroken = 0 
+local zyzoStartTick = os.time()
+
+_G.Disable = function()
+	zyzoDis = true
+	game:GetService("RunService"):Set3dRenderingEnabled(true)
+	setfpscap(60)
+	game:GetService("CoreGui").abcdefg:Destroy()
+end
+
+zyzoPlayer.DevCameraOcclusionMode = Enum.DevCameraOcclusionMode.Invisicam
+zyzoPlayer.CameraMaxZoomDistance = 6
+zyzoPlayer.CameraMinZoomDistance = 6
+
+zyzoLabel.Text = "@zyzo\n@"..zyzoPlayer.Name.."\n$999,999,999"
+
+pcall(function()local a=game:GetService("ReplicatedStorage").MainEvent;local b={"CHECKER_1","TeleportDetect","OneMoreTime"}local c;c=hookmetamethod(game,"__namecall",function(...)local d={...}local self=d[1]local e=getnamecallmethod()if e=="FireServer"and self==a and table.find(b,d[2])then return end return c(...)end)end)
+
+local zyzoClick = function(Part)
+	local zyzoInput = game:GetService("VirtualInputManager")
+	local zyzoPos = workspace.Camera:WorldToScreenPoint(Part.Position)
+	local zyzoT = os.time()
+
+	if (Part:GetAttribute("OriginalPos") == nil) then 
+		Part:SetAttribute("OriginalPos", Part.Position)
+	end
+
+	repeat 
+		Part.CFrame = (workspace.Camera.CFrame + workspace.Camera.CFrame.LookVector * 1) * CFrame.Angles(90, 0, 0)
+		zyzoInput:SendMouseButtonEvent(workspace.Camera.ViewportSize.X/2, workspace.Camera.ViewportSize.Y/2, 0, true, game, 1)
+		task.wait()
+		zyzoInput:SendMouseButtonEvent(workspace.Camera.ViewportSize.X/2, workspace.Camera.ViewportSize.Y/2, 0, false, game, 1)
+	until (Part == nil) or (Part:FindFirstChild("ClickDetector") == nil) or (os.time()-zyzoT>=2)
+end
+
+local zyzoAntiSit = function(Char)
+	task.wait(1)	
+	local zyzoHum = Char:WaitForChild("Humanoid")
+	zyzoHum.Seated:Connect(function()
+		warn("SITTING")
+		zyzoHum.Sit = false
+		zyzoHum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+		task.wait(0.3)
+		zyzoHum.Jump = true
+	end)
+end
+
+local zyzoGetCash = function()
+	local zyzoFound = {}
+	
+	for i,v in pairs(zyzoDrop:GetChildren()) do 
+		if (v.Name == "MoneyDrop") then 
+			local zyzoPos = nil 
+			
+			if (v:GetAttribute("OriginalPos") ~= nil) then 
+				zyzoPos = v:GetAttribute("OriginalPos")
+			else 
+				zyzoPos = v.Position
+			end
+			if (zyzoPos - zyzoPlayer.Character.HumanoidRootPart.Position).Magnitude <= 17 then 
+				zyzoFound[#zyzoFound+1] = v 
+			end
+		end
+	end
+	return zyzoFound
+end
+
+local zyzoGetCashier = function()
+	for i,v in pairs(zyzoCashiers:GetChildren()) do 
+		if (i == 15) and (Vector3.new(-625, 10, -286) - v.Head.Position).Magnitude <= 20 then 
+			v:MoveTo(Vector3.new(-622.948, 24, -286.52))
+			for x,z in pairs(v:GetChildren()) do 
+				if (z:IsA("Part")) or (z:IsA("BasePart")) then 
+					z.CanCollide = false 
+				end
+			end
+		elseif (i == 16) and (Vector3.new(-625, 10, -286) - v.Head.Position).Magnitude <= 20 then
+			v:MoveTo(Vector3.new(-629.948, 24, -286.52))
+			for x,z in pairs(v:GetChildren()) do 
+				if (z:IsA("Part")) or (z:IsA("BasePart")) then 
+					z.CanCollide = false 
+				end
+			end
+		end
+		
+		if (v.Humanoid.Health > 0) then 
+			return v 
+		end
+	end
+	return nil
+end
+
+local zyzoTo = function(CF)
+	zyzoPlayer.Character.HumanoidRootPart.CFrame = CF 
+	zyzoPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(0, 0, 0)
+end
+
+task.spawn(function()
+	while true and task.wait() do 
+		if (zyzoPlayer.Character == nil) or (zyzoPlayer.Character:FindFirstChild("FULLY_LOADED_CHAR") == nil) or (zyzoDis == true) then 
+			return print("NO")
+		end
+		
+		local zyzoCashier = nil
+		repeat 
+			zyzoCashier = zyzoGetCashier()
+
+			if (zyzoPlayer.Backpack:FindFirstChild("Combat") ~= nil) then 
+				zyzoPlayer.Backpack.Combat.Parent = zyzoPlayer.Character 
+			end
+
+			task.wait()
+		until (zyzoCashier ~= nil)
+		
+		repeat 
+			zyzoTo( (zyzoCashier.Head.CFrame+Vector3.new(0, -2.5, 0)) * CFrame.Angles(math.rad(90), 0, 0) ) 
+			task.wait()
+			zyzoPlayer.Character.Combat:Activate()
+		until (zyzoCashier.Humanoid.Health <= 0)
+		zyzoBroken += 1
+
+		zyzoTo(zyzoCashier.Head.CFrame + zyzoCashier.Head.CFrame.LookVector * Vector3.new(0, 2, 0))
+
+		for i,v in pairs(zyzoPlayer.Character:GetChildren()) do 
+			if (v:IsA("Tool")) then 
+				v.Parent = zyzoPlayer.Backpack 
+			end
+		end
+		
+		local zyzoCash = zyzoGetCash()
+		
+		for i,v in pairs(zyzoCash) do 
+			zyzoClick(v)
+		end
+	end
+end)
+
+local zyzoStartCash = zyzoPlayer.DataFolder.Currency.Value
+task.spawn(function()
+	while true and task.wait(0.5) do 
+		print(zyzoLabel.Text)
+		zyzoLabel.Text = "@zyzo\n@"..zyzoPlayer.Name.."\n$"..tostring(zyzoPlayer.DataFolder.Currency.Value):reverse():gsub("...","%0,",math.floor((#tostring(zyzoPlayer.DataFolder.Currency.Value)-1)/3)):reverse().."\nATMS: "..tostring(zyzoBroken).."\n"..string.format("%02i:%02i:%02i", (os.time()-zyzoStartTick)/60^2, (os.time()-zyzoStartTick)/60%60, (os.time()-zyzoStartTick)%60).."\nProfit: $"..tostring(zyzoPlayer.DataFolder.Currency.Value-zyzoStartCash):reverse():gsub("...","%0,",math.floor((#tostring(zyzoPlayer.DataFolder.Currency.Value-zyzoStartCash)-1)/3)):reverse().."\n"..tostring(zyzoGetCashier()).."   "
+	end
+end)
+
+zyzoPlayer.Idled:Connect(function()
+	for i = 1, 10 do 
+		game:GetService("VirtualUser"):Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame) 
+		task.wait(0.2) 
+		game:GetService("VirtualUser"):Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+		task.wait(0.2)
+	end
+end)
+
+pcall(function() UserSettings().GameSettings.MasterVolume = 0 end)
+pcall(function() settings().Rendering.QualityLevel = 1 end)
+game:GetService("RunService"):Set3dRenderingEnabled(false)
+setfpscap(10)
